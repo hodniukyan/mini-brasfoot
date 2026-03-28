@@ -1,0 +1,19 @@
+# Build
+bin/
+obj/
+
+# Banco de dados
+*.db
+
+# Arquivos de ambiente
+.env
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# Sistema
+.DS_Store
+Thumbs.db

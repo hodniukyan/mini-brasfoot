@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrasfootAPI", "BrasfootAPI.csproj", "{B5271CF5-FBF3-F60C-1EA4-04714DDB4337}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B5271CF5-FBF3-F60C-1EA4-04714DDB4337}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5271CF5-FBF3-F60C-1EA4-04714DDB4337}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5271CF5-FBF3-F60C-1EA4-04714DDB4337}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5271CF5-FBF3-F60C-1EA4-04714DDB4337}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0F84D334-A523-420D-A043-1BF6B024409B}
+	EndGlobalSection
+EndGlobal
