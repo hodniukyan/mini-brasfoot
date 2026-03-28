@@ -21,6 +21,14 @@ app.UseCors(policy =>
 // Swagger
 app.UseSwagger();
 app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.Urls.Add("http://localhost:5063");
+}
+else
+{
+    app.Urls.Add("http://0.0.0.0:8080");
+}
 
 
 
