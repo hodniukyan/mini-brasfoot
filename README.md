@@ -57,6 +57,7 @@ Este projeto foi um laboratório prático para consolidar diversos fundamentos d
 
 - `POST /players` → Cria um novo jogador.
 - `GET /teams/{id}/players` → Lista todos os jogadores pertencentes a um time específico.
+- `PUT /teams/{id}/players` → Atualiza os dados de um jogador
 
 ### 🔴 Partidas e Simulação
 

@@ -100,6 +100,9 @@ app.MapPost("/players", async (Player player, AppDbContext db) =>
     if (string.IsNullOrWhiteSpace(player.Name))
         return Results.BadRequest("Nome obrigatório");
 
+    if (string.IsNullOrWhiteSpace(player.Position))
+        return Results.BadRequest("Posição é obrigatória");
+
     var teamExists = await db.Teams.AnyAsync(t => t.Id == player.TeamId);
 
     if (!teamExists)
@@ -135,10 +138,24 @@ app.MapPut("/teams/{id}/players", async (int id, Player updatedPlayer, AppDbCont
     player.Name = updatedPlayer.Name;
     player.Age = updatedPlayer.Age;
     player.Skill = updatedPlayer.Skill;
+    player.Position = updatedPlayer.Position;
 
     await db.SaveChangesAsync();
 
     return Results.Ok(player);
+});
+
+app.MapDelete("/teams/{id}/players", async (int id, AppDbContext db) =>
+{
+    var player = await db.Players.FindAsync(id);
+
+    if (player == null)
+        return Results.NotFound("Jogador não encontrado");
+
+    db.Players.Remove(player);
+    await db.SaveChangesAsync();
+
+    return Results.Ok("Jogador removido");
 });
 
 // **-----------PARTIDAS-----------**
@@ -153,17 +170,25 @@ app.MapPost("/match", async (int team1Id, int team2Id, AppDbContext db) =>
     var team1Players = await db.Players.Where(p => p.TeamId == team1Id).ToListAsync();
     var team2Players = await db.Players.Where(p => p.TeamId == team2Id).ToListAsync();
 
+    // FILTRA QUEM PODE FAZER GOL (REMOVE GOLEIRO)
+    var scorersTeam1 = team1Players.Where(p => p.Position != "GK").ToList();
+    var scorersTeam2 = team2Players.Where(p => p.Position != "GK").ToList();
+
+    // VALIDAÇÃO IMPORTANTE
+    if (!scorersTeam1.Any() || !scorersTeam2.Any())
+        return Results.BadRequest("Times precisam ter jogadores de linha");
+
     var team1Strength = team1.Strength + team1Players.Sum(p => p.Skill);
     var team2Strength = team2.Strength + team2Players.Sum(p => p.Skill);
 
     var random = new Random();
 
-    // SIMULAÇÃO BASEADA EM CHANCES
     int team1Goals = 0;
     int team2Goals = 0;
 
-    int chances = 5; // número de "jogadas perigosas"
+    int chances = 5;
 
+    // SIMULAÇÃO DAS JOGADAS
     for (int i = 0; i < chances; i++)
     {
         var chance1 = random.Next(0, team1Strength);
@@ -175,11 +200,11 @@ app.MapPost("/match", async (int team1Id, int team2Id, AppDbContext db) =>
             team2Goals++;
     }
 
-    // PEQUENA ALEATORIEDADE EXTRA (pra não ficar engessado)
+    // ALEATORIEDADE EXTRA
     team1Goals += random.Next(0, 2);
     team2Goals += random.Next(0, 2);
 
-    // LIMITE REALISTA
+    // LIMITE DE GOLS
     team1Goals = Math.Min(team1Goals, 6);
     team2Goals = Math.Min(team2Goals, 6);
 
@@ -188,7 +213,7 @@ app.MapPost("/match", async (int team1Id, int team2Id, AppDbContext db) =>
     // GOLS TIME 1
     for (int i = 0; i < team1Goals; i++)
     {
-        var player = team1Players[random.Next(team1Players.Count)];
+        var player = scorersTeam1[random.Next(scorersTeam1.Count)];
 
         goals.Add(new
         {
@@ -200,7 +225,7 @@ app.MapPost("/match", async (int team1Id, int team2Id, AppDbContext db) =>
     // GOLS TIME 2
     for (int i = 0; i < team2Goals; i++)
     {
-        var player = team2Players[random.Next(team2Players.Count)];
+        var player = scorersTeam2[random.Next(scorersTeam2.Count)];
 
         goals.Add(new
         {
