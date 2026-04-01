@@ -216,17 +216,19 @@ app.MapPost("/match", async (int team1Id, int team2Id, AppDbContext db) =>
     team1Goals = Math.Min(team1Goals, 6);
     team2Goals = Math.Min(team2Goals, 6);
 
-    var goals = new List<object>();
+    var goals = new List<Goal>();
 
     // GOLS TIME 1
     for (int i = 0; i < team1Goals; i++)
     {
         var player = scorersTeam1[random.Next(scorersTeam1.Count)];
+        var tempoGol = random.Next(1, 91);
 
-        goals.Add(new
+        goals.Add(new Goal
         {
-            team = team1.Name,
-            player = player.Name
+            Minute = tempoGol,
+            Team = team1.Name,
+            Player = player.Name
         });
     }
 
@@ -234,13 +236,18 @@ app.MapPost("/match", async (int team1Id, int team2Id, AppDbContext db) =>
     for (int i = 0; i < team2Goals; i++)
     {
         var player = scorersTeam2[random.Next(scorersTeam2.Count)];
+        var tempoGol = random.Next(1, 91);
 
-        goals.Add(new
+        goals.Add(new Goal
         {
-            team = team2.Name,
-            player = player.Name
+            Minute = tempoGol,
+            Team = team2.Name,
+            Player = player.Name
         });
     }
+
+    // ORDENAR OS GOALS PELO TEMPO EM ORDEM CRESCENTE
+    goals = goals.OrderBy(g => g.Minute).ToList();
 
     return Results.Ok(new
     {

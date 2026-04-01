@@ -56,7 +56,7 @@ function mostrarResultado(data) {
   // gols
   data.goals.forEach((gol) => {
     const p = document.createElement("p");
-    p.innerText = `${gol.player} (${gol.team})`;
+    p.innerText = `${gol.minute}' ${gol.player} (${gol.team})`;
     container.appendChild(p);
   });
 }
