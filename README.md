@@ -82,7 +82,7 @@ A simulação de partidas **não é determinística**, buscando o realismo do es
     { "team": "Real Madrid", "player": "Benzema" }
   ]
 }
-
+````
 ## 🎨 Integração Front-end e UI
 
 O front-end foi desenhado para invocar a nostalgia dos primeiros managers de futebol.
@@ -139,3 +139,5 @@ Desenvolvido por **Yan Hodniuk** 🚀
 
 > *Projeto criado com foco em aprendizado prático, evoluindo de conceitos básicos à integração end-to-end.*
 ````
+
+
