@@ -178,47 +178,91 @@ app.MapPost("/match", async (int team1Id, int team2Id, AppDbContext db) =>
     var team1Players = await db.Players.Where(p => p.TeamId == team1Id).ToListAsync();
     var team2Players = await db.Players.Where(p => p.TeamId == team2Id).ToListAsync();
 
-    // FILTRA QUEM PODE FAZER GOL (REMOVE GOLEIRO)
     var scorersTeam1 = team1Players.Where(p => p.Position != "GK").ToList();
     var scorersTeam2 = team2Players.Where(p => p.Position != "GK").ToList();
 
-    // VALIDAÇÃO IMPORTANTE
     if (!scorersTeam1.Any() || !scorersTeam2.Any())
         return Results.BadRequest("Times precisam ter jogadores de linha");
 
-    var team1Strength = team1.Strength + team1Players.Sum(p => p.Skill);
-    var team2Strength = team2.Strength + team2Players.Sum(p => p.Skill);
+    int team1Strength = team1.Strength + (int)team1Players.Average(p => p.Skill);
+    int team2Strength = team2.Strength + (int)team2Players.Average(p => p.Skill);
 
     var random = new Random();
 
     int team1Goals = 0;
     int team2Goals = 0;
 
-    int chances = 5;
+    int diff = team1Strength - team2Strength;
 
-    // SIMULAÇÃO DAS JOGADAS
-    for (int i = 0; i < chances; i++)
+    string nivel;
+
+    if (Math.Abs(diff) > 30)
+        nivel = "massacre";
+    else if (Math.Abs(diff) > 10)
+        nivel = "favorito";
+    else
+        nivel = "equilibrado";
+
+    bool team1IsStronger = diff >= 0;
+
+    int forteGoals = 0;
+    int fracoGoals = 0;
+
+    // 🔥 GERAÇÃO BASE (CONTROLADA)
+    if (nivel == "massacre")
     {
-        var chance1 = random.Next(0, team1Strength);
-        var chance2 = random.Next(0, team2Strength);
-
-        if (chance1 > chance2)
-            team1Goals++;
-        else if (chance2 > chance1)
-            team2Goals++;
+        forteGoals = random.Next(3, 6); // 3 a 5
+        fracoGoals = random.Next(0, 2); // 0 ou 1
+    }
+    else if (nivel == "favorito")
+    {
+        forteGoals = random.Next(2, 5); // 2 a 4
+        fracoGoals = random.Next(0, 2); // 0 ou 1
+    }
+    else
+    {
+        forteGoals = random.Next(0, 3);
+        fracoGoals = random.Next(0, 3);
     }
 
-    // ALEATORIEDADE EXTRA
-    team1Goals += random.Next(0, 2);
-    team2Goals += random.Next(0, 2);
+    // 🔥 ZEBRA CONTROLADA (5%)
+    int zebra = random.Next(0, 100);
 
-    // LIMITE DE GOLS
-    team1Goals = Math.Min(team1Goals, 6);
-    team2Goals = Math.Min(team2Goals, 6);
+    if (zebra < 5)
+    {
+        // zebra só ganha com placar baixo
+        int zebraGoals = random.Next(1, 3); // 1 ou 2
+        int favoritoGoals = random.Next(0, 2); // 0 ou 1
+
+        forteGoals = favoritoGoals;
+        fracoGoals = zebraGoals;
+    }
+
+    // 🔥 APLICA RESULTADO
+    if (team1IsStronger)
+    {
+        team1Goals = forteGoals;
+        team2Goals = fracoGoals;
+    }
+    else
+    {
+        team1Goals = fracoGoals;
+        team2Goals = forteGoals;
+    }
+
+    // 🔥 SEGURANÇA FINAL (ANTI-ABSURDO)
+    if (!team1IsStronger && team1Goals > 2)
+        team1Goals = 2;
+
+    if (team1IsStronger && team2Goals > 2)
+        team2Goals = 2;
+
+    // limite geral
+    team1Goals = Math.Min(team1Goals, 5);
+    team2Goals = Math.Min(team2Goals, 5);
 
     var goals = new List<Goal>();
 
-    // GOLS TIME 1
     for (int i = 0; i < team1Goals; i++)
     {
         var player = scorersTeam1[random.Next(scorersTeam1.Count)];
@@ -232,7 +276,6 @@ app.MapPost("/match", async (int team1Id, int team2Id, AppDbContext db) =>
         });
     }
 
-    // GOLS TIME 2
     for (int i = 0; i < team2Goals; i++)
     {
         var player = scorersTeam2[random.Next(scorersTeam2.Count)];
@@ -246,13 +289,13 @@ app.MapPost("/match", async (int team1Id, int team2Id, AppDbContext db) =>
         });
     }
 
-    // ORDENAR OS GOALS PELO TEMPO EM ORDEM CRESCENTE
     goals = goals.OrderBy(g => g.Minute).ToList();
 
     return Results.Ok(new
     {
         Team1 = team1.Name,
         Team2 = team2.Name,
+        Nivel = nivel,
         Score = $"{team1Goals} x {team2Goals}",
         Goals = goals
     });
