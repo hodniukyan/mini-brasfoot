@@ -225,10 +225,10 @@ app.MapPost("/match", async (int team1Id, int team2Id, AppDbContext db) =>
         fracoGoals = random.Next(0, 3);
     }
 
-    // 🔥 ZEBRA CONTROLADA (5%)
+    // 🔥 ZEBRA CONTROLADA (20%)
     int zebra = random.Next(0, 100);
 
-    if (zebra < 5)
+    if (zebra < 20)
     {
         // zebra só ganha com placar baixo
         int zebraGoals = random.Next(1, 3); // 1 ou 2
